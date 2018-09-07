@@ -1,13 +1,12 @@
 // ==UserScript==
 // @name         BUPT GPA
 // @namespace    https://ssine.cc/
-// @version      1.1
+// @version      1.0
 // @description  Calculate GPA in URP system
 // @author       Liu Siyao
 // @match        http://jwxt.bupt.edu.cn/jwLoginAction.do
 // @grant        none
 // @require      https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js
-// @license      MIT
 // ==/UserScript==
 
 (function() {
@@ -37,72 +36,56 @@
                     var area = algoArea[i];
                     var gp = algoGp[i];
                     for (var idx in area) {
-                        if(score <= area[idx])
+                        if(score <= area[idx]) 
                             return gp[idx];
                     }
                     return score;
                 };
 
+                function appendResult(lst, name) {
+                    var sum = 0, total = 0;
+                    var gpLst = [0, 0, 0, 0, 0, 0];
+    
+                    for (var idx = 0; idx < lst.length; idx++) {
+                        var items = lst[idx].getElementsByTagName('td');
+                        if (items[6].innerText.search('免修') != -1)
+                            continue;
+                        if (items[6].innerText.search('通过') != -1)
+                            continue;
+                        total += parseFloat(items[4].innerText);
+                        sum += parseFloat(items[4].innerText) * parseFloat(items[6].innerText);
+                        for (var j in gpLst) {
+                            gpLst[j] += parseFloat(items[4].innerText) * getGP(parseFloat(items[6].innerText), j);
+                        }
+                    };
+    
+                    var frame = window.parent.frames[1].document.getElementsByName('mainFrame')[0];
+                    frame = frame.contentDocument || frame.contentWindow.document;
+                    var injectEntry = $(frame).find('.hometopbg1:first');
+                    var contentStr = "特殊加权学分绩:   " + (sum / total).toFixed(2);
+                    contentStr += "\\n已修读学分:   " + total.toString();
+                    for (var idx in gpLst) {
+                        contentStr += "\\nGPA(" + algoNames[idx] + "):   " + (gpLst[idx]/total).toFixed(2);
+                    }
+                    var newtr = $('<tr><td height="25"><a href="javascript:alert(\'' + contentStr +
+                                  '\');">查看GPA(' + name + ')</a></td></tr>');
+                    injectEntry.append(newtr);
+                }
+
                 var parser = new DOMParser();
                 var doc = parser.parseFromString(res, "text/html");
 
-                var lst = doc.getElementsByName('qb_001')[0].getElementsByClassName('odd');
+                var lst_1 = doc.querySelectorAll('a[name=qb_001] .odd');
 
-                var sum = 0, total = 0;
-                var gpLst = [0, 0, 0, 0, 0, 0];
-
-                for (var idx = 0; idx < lst.length; idx++) {
-                    var items = lst[idx].getElementsByTagName('td');
-                    if (items[6].innerText.search('免修') != -1)
-                        continue;
-                    if (items[6].innerText.search('通过') != -1)
-                        continue;
-                    total += parseFloat(items[4].innerText);
-                    sum += parseFloat(items[4].innerText) * parseFloat(items[6].innerText);
-                    for (var j in gpLst) {
-                        gpLst[j] += parseFloat(items[4].innerText) * getGP(parseFloat(items[6].innerText), j);
-                    }
-                };
-
-                var frame = window.parent.frames[1].document.getElementsByName('mainFrame')[0];
-                frame = frame.contentDocument || frame.contentWindow.document;
-                var injectEntry = $(frame).find('.hometopbg1:first');
-                var contentStr = "特殊加权学分绩:   " + (sum / total).toFixed(2);
-                contentStr += "\\n已修读必修学分:   " + total.toString();
-                for (var idx in gpLst) {
-                    contentStr += "\\nGPA(" + algoNames[idx] + "):   " + (gpLst[idx]/total).toFixed(2);
-                }
-                var newtr = $('<tr><td height="25"><a href="javascript:alert(\'' + contentStr + '\');">查看GPA(必修)</a></td></tr>');
-                injectEntry.append(newtr);
-
-
-                // 算上选修TAT
-
-                var lst = doc.getElementsByClassName('odd');
-
-                var sum = 0, total = 0;
-                var gpLst = [0, 0, 0, 0, 0, 0];
-
-                for (var idx = 0; idx < lst.length; idx++) {
-                    var items = lst[idx].getElementsByTagName('td');
-                    if (items[6].innerText.search('免修') != -1)
-                        continue;
-                    if (items[6].innerText.search('通过') != -1)
-                        continue;
-                    total += parseFloat(items[4].innerText);
-                    sum += parseFloat(items[4].innerText) * parseFloat(items[6].innerText);
-                    for (var j in gpLst) {
-                        gpLst[j] += parseFloat(items[4].innerText) * getGP(parseFloat(items[6].innerText), j);
-                    }
-                };
-
-                var contentStr = "特殊加权学分绩:   " + (sum / total).toFixed(2);
-                contentStr += "\\n已修读总学分:   " + total.toString();
-                for (var idx in gpLst) {
-                    contentStr += "\\nGPA(" + algoNames[idx] + "):   " + (gpLst[idx]/total).toFixed(2);
-                }
-                var newtr = $('<tr><td height="25"><a href="javascript:alert(\'' + contentStr + '\');">查看GPA(全部)</a></td></tr>');
-                injectEntry.append(newtr);
+                appendResult(lst_1, "必修");
+                
+                var lst_2 = doc.querySelectorAll('a[name=qb_001] .odd, a[name=qb_02] .odd');
+                
+                appendResult(lst_2, "必修+选修");
+                
+                var lst_3 = doc.querySelectorAll('.odd');
+                
+                appendResult(lst_3, "必修+选修+任选");
             }
         )
     }
