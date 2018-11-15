@@ -1,5 +1,7 @@
 # BUPT GPA Calculator
 
+source: https://greasyfork.org/zh-CN/scripts/369550-bupt-gpa
+
 A tampermonkey script that automatically calculates BUPT GPA in URP system.
 
 自动计算URP教务系统内成绩的GPA。
