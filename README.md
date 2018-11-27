@@ -11,3 +11,5 @@ A tampermonkey script that automatically calculates BUPT GPA in URP system.
 ![](https://greasyfork.org/system/screenshots/screenshots/000/012/258/original/1.png)
 
 ![](https://greasyfork.org/system/screenshots/screenshots/000/012/259/original/2.png)
+
+![](https://greasyfork.org/system/screenshots/screenshots/000/013/138/original/gui.png)
