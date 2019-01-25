@@ -1,10 +1,11 @@
 // ==UserScript==
 // @name         BUPT GPA
 // @namespace    https://ssine.cc/
-// @version      1.5
+// @version      1.7
 // @description  Calculate GPA in URP system
 // @author       Liu Siyao
-// @match        http://jwxt.bupt.edu.cn/jwLoginAction.do
+// @include      *://jwxt.bupt.edu.cn/jwLoginAction.do
+// @include      *://vpn.bupt.edu.cn/http/jwxt.bupt.edu.cn/jwLoginAction.do
 // @grant        none
 // @require      https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js
 // @require      https://cdn.jsdelivr.net/npm/vue
@@ -13,7 +14,10 @@
 (function() {
 'use strict';
 window.parent.frames[1].onload = ()=>{
-$.get('http://jwxt.bupt.edu.cn/gradeLnAllAction.do?type=ln&oper=qbinfo').then(
+var url_prefix = /vpn/.test(window.location.href) ? 'https://vpn.bupt.edu.cn/http/' : 'http://';
+// console.log(window.location.href);
+// console.log(/vpn/.test(window.location.href));
+$.get(url_prefix + 'jwxt.bupt.edu.cn/gradeLnAllAction.do?type=ln&oper=qbinfo').then(
 (res)=>{
 
     var algoNames = ['标准4.0', '改进4.0', '北大4.0', '加拿大4.3', '中科大4.3', '上海交大4.3'];
@@ -61,7 +65,7 @@ $.get('http://jwxt.bupt.edu.cn/gradeLnAllAction.do?type=ln&oper=qbinfo').then(
     var semester_name = '';
 
     function showResult() {
-        console.log(course_lst);
+        // console.log(course_lst);
         
         var sum = 0, total_credit = 0;
         var gpLst = [0, 0, 0, 0, 0, 0];
