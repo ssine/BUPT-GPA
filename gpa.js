@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         BUPT GPA
 // @namespace    https://ssine.cc/
-// @version      1.7
+// @version      1.8
 // @description  Calculate GPA in URP system
 // @author       Liu Siyao
 // @include      *://jwxt.bupt.edu.cn/jwLoginAction.do
@@ -14,10 +14,7 @@
 (function() {
 'use strict';
 window.parent.frames[1].onload = ()=>{
-var url_prefix = /vpn/.test(window.location.href) ? 'https://vpn.bupt.edu.cn/http/' : 'http://';
-// console.log(window.location.href);
-// console.log(/vpn/.test(window.location.href));
-$.get(url_prefix + 'jwxt.bupt.edu.cn/gradeLnAllAction.do?type=ln&oper=qbinfo').then(
+$.get('/gradeLnAllAction.do?type=ln&oper=qbinfo').then(
 (res)=>{
 
     var algoNames = ['标准4.0', '改进4.0', '北大4.0', '加拿大4.3', '中科大4.3', '上海交大4.3'];
@@ -124,7 +121,7 @@ $.get(url_prefix + 'jwxt.bupt.edu.cn/gradeLnAllAction.do?type=ln&oper=qbinfo').t
         injectEntry.append(newtr);
     }
 
-    $.get('http://jwxt.bupt.edu.cn/gradeLnAllAction.do?type=ln&oper=sxinfo&lnsxdm=001').then( (res)=>{
+    $.get('/gradeLnAllAction.do?type=ln&oper=sxinfo&lnsxdm=001').then( (res)=>{
         var doc = new DOMParser().parseFromString(res, "text/html");
         appendResult(doc.querySelectorAll('a[name=qb_001] .odd'), "必修");
         appendResult(doc.querySelectorAll('a[name=qb_001] .odd, a[name=qb_02] .odd'), "必修+选修");
@@ -239,6 +236,8 @@ $.get(url_prefix + 'jwxt.bupt.edu.cn/gradeLnAllAction.do?type=ln&oper=qbinfo').t
     }\
     #gpa-main-frame {\
         float: left;\
+        height: 100%;\
+        overflow: auto;\
     }\
     #gpa-modify table tr td:first-child, #gpa-modify table tr th:first-child {\
         width: 200px;\
