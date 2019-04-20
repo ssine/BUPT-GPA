@@ -1,10 +1,11 @@
 // ==UserScript==
 // @name         BUPT GPA
 // @namespace    https://ssine.cc/
-// @version      1.9
+// @version      2.1
 // @description  Calculate GPA in URP system
 // @author       Liu Siyao
 // @include      *://jwxt.bupt.edu.cn/jwLoginAction.do
+// @include      *://jwxt.bupt.edu.cn/caslogin.jsp
 // @include      *://vpn.bupt.edu.cn/http/jwxt.bupt.edu.cn/jwLoginAction.do
 // @grant        none
 // @require      https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js
