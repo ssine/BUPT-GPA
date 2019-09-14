@@ -1,15 +1,13 @@
 # BUPT GPA Calculator
 
-source: https://greasyfork.org/zh-CN/scripts/369550-bupt-gpa
+在此安装: https://greasyfork.org/zh-CN/scripts/369550-bupt-gpa
 
 A tampermonkey script that automatically calculates BUPT GPA in URP system.
 
-自动计算URP教务系统内成绩的GPA。
+自动计算北京邮电大学教务系统内成绩的GPA。
 
-启用脚本后，登入教务系统，在 我须留意->成绩查询 处会出现相应按钮。
+启用脚本后，登入教务系统，在页面右下方有计算面板的按钮。
 
-![](https://greasyfork.org/system/screenshots/screenshots/000/012/258/original/1.png)
+csv export: credit to [yuhao-su](https://github.com/yuhao-su)
 
-![](https://greasyfork.org/system/screenshots/screenshots/000/012/259/original/2.png)
-
-![](https://greasyfork.org/system/screenshots/screenshots/000/013/138/original/gui.png)
+![img](https://greasyfork.org/system/screenshots/screenshots/000/013/138/original/gui.png)
