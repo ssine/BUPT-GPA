@@ -49,7 +49,8 @@ Promise.all([p1, p2]).then((data) => {
     }
     return score;
   };
-
+  
+  
   class course {
     constructor(no, name, semester, type, credit, grade) {
       this.no = no;
@@ -60,12 +61,27 @@ Promise.all([p1, p2]).then((data) => {
       this.grade = grade;
     }
   }
-
+  
   let calc_mat = [];
   let course_lst = [];
+  let course_lst_csv = 'Name, Credit, Grade\n'
   let semesters = [];
   let course_types = ['必修', '选修', '任选'];
   let semester_name = '';
+  function fakeClick(obj) {
+    let ev = document.createEvent("MouseEvents");
+    ev.initMouseEvent("click", true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
+    obj.dispatchEvent(ev);
+  }
+  
+  function exportRaw() {
+    let urlObject = window.URL || window.webkitURL || window;
+    let export_blob = new Blob([course_lst_csv]);
+    let save_link = document.createElementNS("http://www.w3.org/1999/xhtml", "a")
+    save_link.href = urlObject.createObjectURL(export_blob);
+    save_link.download = "my_grade.csv";
+    fakeClick(save_link);
+  } 
 
   function showResult() {
     // show courses in course_lst to div
@@ -83,7 +99,6 @@ Promise.all([p1, p2]).then((data) => {
         gpLst[j] += course.credit * getGP(course.grade, j);
       }
     };
-
 
     $('#gpa-res').empty();
     $('#gpa-res').append($('<table>\
@@ -132,14 +147,20 @@ Promise.all([p1, p2]).then((data) => {
         if (grade_text in ['优', '良', '中', '差'])
           grade = course_no_to_grade[lst[0].innerText.trim()];
         if (isNaN(grade)) continue;
+        let course_no = lst[0].innerText.trim();
+        let course_name_zh = lst[2].innerText.trim();
+        let course_name_en = lst[3].innerText.trim();
+        let course_type = lst[5].innerText.trim();
+        let course_credit = lst[4].innerText.trim();
         course_lst.push(new course(
-          lst[0].innerText.trim(),
-          lst[2].innerText.trim(),
+          course_no,
+          course_name_zh,
           semester_name,
-          lst[5].innerText.trim(),
-          parseFloat(lst[4].innerText),
+          course_type,
+          parseFloat(course_credit),
           grade
         ));
+        course_lst_csv += (course_name_en+','+course_credit+','+grade+'\n');
       }
     }
   }
@@ -197,6 +218,8 @@ Promise.all([p1, p2]).then((data) => {
   <h2>结果:</h2>\
   <div id="gpa-res">\
   </div>\
+  <div id="csv-download">\
+  </div>\
   <hr>\
   <p>程序完全基于前端，不会存储个人信息。</p>\
   <p>觉得好用来<a target="_blank" href="https://github.com/ssine/BUPT-GPA">仓库</a>点个star好不好ヽ(✿ﾟ▽ﾟ)ノ</p>\
@@ -244,8 +267,13 @@ Promise.all([p1, p2]).then((data) => {
     font-family: sans-serif;\
   }\
   </style>');
-  $('head').append(sheet_css);
+  
+  let btn_download = $('<button id="download-btn">下载CSV成绩单</button>');
+  btn_download.click(() => {
+    exportRaw();
+  });
 
+  $('head').append(sheet_css);
   gpa_div.hide();
   $('html').append(gpa_div);
 
@@ -258,7 +286,7 @@ Promise.all([p1, p2]).then((data) => {
       app.css('display', 'none');
   });
   $('html').append(btn);
-
+  $('#csv-download').append(btn_download);
   showResult();
 
   let gpa_modify = new Vue({
