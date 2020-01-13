@@ -64,7 +64,7 @@ Promise.all([p1, p2]).then((data) => {
   
   let calc_mat = [];
   let course_lst = [];
-  let course_lst_csv = 'Name, Credit, Grade\n'
+  let course_lst_csv = 'Name,Credit,Grade\n'
   let semesters = [];
   let course_types = ['必修', '选修', '任选'];
   let semester_name = '';
