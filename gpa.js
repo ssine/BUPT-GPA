@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         BUPT GPA
-// @namespace    https://ssine.cc/
+// @namespace    https://ssine.ink/
 // @version      3.2
 // @description  Calculate GPA in URP system
 // @author       Liu Siyao
