@@ -11,6 +11,7 @@
 // @include      *://jwgl.bupt.edu.cn/jsxsd/framework/xsMain.jsp
 // @include      *://vpn.bupt.edu.cn/http/jwgl.bupt.edu.cn/jsxsd/framework/xsMain.jsp
 // @include      *://vpn.bupt.edu.cn/https/jwgl.bupt.edu.cn/jsxsd/framework/xsMain.jsp
+// @include      *://webvpn.bupt.edu.cn/*/jsxsd/framework/xsMain.jsp
 // @grant        none
 // @require      https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js
 // @require      https://cdn.jsdelivr.net/npm/vue
