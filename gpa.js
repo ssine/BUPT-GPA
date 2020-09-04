@@ -208,8 +208,8 @@
         body_lst = body_lst.map(it => it.cells);
 
         for (let item of body_lst) {
-          if (item[6].innerText.trim() === '免修') continue;
-          if (item[6].innerText.trim() === '缓考') continue;
+          if (item[6].innerText.indexOf('免修') !== -1) continue;
+          if (item[6].innerText.indexOf('缓考') !== -1) continue;
           semester_name = item[1].innerText.trim();
           if (semesters.indexOf(semester_name) == -1) {
             semesters.push(semester_name);
@@ -222,7 +222,7 @@
           let course_no = item[2].innerText.trim();
           let course_name_zh = item[3].innerText.trim();
           let course_name_en = item[3].innerText.trim(); // not found yet...
-          let course_type = item[13].innerText.trim();
+          let course_type = item[12].innerText.trim();
           if (course_type === '公选') course_type = '任选';
           let course_credit = item[7].innerText.trim();
           course_lst.push(new course(
