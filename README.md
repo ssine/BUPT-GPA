@@ -10,4 +10,4 @@ A tampermonkey script that automatically calculates BUPT GPA in URP system.
 
 csv export: credit to [yuhao-su](https://github.com/yuhao-su)
 
-![img](https://greasyfork.org/system/screenshots/screenshots/000/013/138/original/gui.png)
+![img](https://github.com/ssine/BUPT-GPA/blob/master/preview.png)
