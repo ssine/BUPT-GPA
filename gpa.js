@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         BUPT GPA
-// @namespace    https://ssine.ink/
-// @version      3.2
+// @namespace    https://ssine.cc/
+// @version      3.4
 // @description  Calculate GPA in URP system
 // @author       Liu Siyao
 // @include      *://jwxt.bupt.edu.cn/jwLoginAction.do
@@ -13,16 +13,30 @@
 // @include      *://vpn.bupt.edu.cn/https/jwgl.bupt.edu.cn/jsxsd/framework/xsMain.jsp
 // @include      *://webvpn.bupt.edu.cn/*/jsxsd/framework/xsMain.jsp
 // @grant        none
-// @require      https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js
-// @require      https://cdn.jsdelivr.net/npm/vue
+// @require      https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js
+// @require      https://cdn.jsdelivr.net/npm/vue@2.5.2/dist/vue.min.js
+// @license      GNU GPLv3
 // ==/UserScript==
 
 (function () {
   'use strict';
+  // set this true when GPA button disappears
+  // brutal fix for the damn jwgl bug
+  const iterate_query = true;
 
+  function translate_sem_to_number(sem_str) {
+    let sem_arr = sem_str.split('-');
+    return parseInt(sem_arr[1] + sem_arr[0] + sem_arr[2]);
+  }
+  // only work when iterate_query is true
+  const sem_start = translate_sem_to_number('2019-2020-1'); // your first semester here
+  let date = new Date();
+  let year = date.getFullYear();
+  // auto calculate the current semester
+  const sem_end = translate_sem_to_number(year + '-' + (year + 1) + '-5');
   const is_old_system = /jwxt/.test(window.location.href);
 
-  function run() {
+  async function run() {
 
     let promises = [];
     if (is_old_system) {
@@ -31,14 +45,40 @@
         $.get('/gradeLnAllAction.do?type=ln&oper=lnFajhKcCjInfo&lnxndm=*')
       ]);
     } else {
-      promises = promises.concat([
-        $.post('/jsxsd/kscj/cjcx_list', {
-          kksj: "",
-          kcxz: "",
-          kcmc: "",
-          xsfs: "all"
-        })
-      ]);
+      if (iterate_query) {
+        await $.get('/jsxsd/kscj/cjcx_query').then((data) => {
+          let parser = new DOMParser();
+          let doc = parser.parseFromString(data, 'text/html');
+          let sem_options = doc.querySelectorAll("#kksj > option");
+          for (let i = 0; i < sem_options.length; i++) {
+            let sem_str = sem_options[i].value;
+            let sem_number = 0;
+            sem_number = translate_sem_to_number(sem_str);
+            if (isNaN(sem_number)) continue;
+            if (sem_number > sem_end) continue;
+            if (sem_number >= sem_start) {
+              promises.push(
+                $.post('/jsxsd/kscj/cjcx_list', {
+                  kksj: sem_str,
+                  kcxz: "",
+                  kcmc: "",
+                  xsfs: "all"
+                }));
+            } else {
+              break;
+            }
+          };
+        });
+      } else {
+        promises = promises.concat([
+          $.post('/jsxsd/kscj/cjcx_list', {
+            kksj: "",
+            kcxz: "",
+            kcmc: "",
+            xsfs: "all"
+          }),
+        ]);
+      }
     }
 
     Promise.all(promises).then((data) => {
@@ -123,7 +163,7 @@
           for (let j in gpLst) {
             gpLst[j] += course.credit * getGP(course.grade, j);
           }
-          used_couse_num ++;
+          used_couse_num++;
         };
 
         $('#gpa-res').empty();
@@ -194,47 +234,53 @@
         }
 
       } else {
-        let named_grade = {
-          '差': 65,
-          '及格': 65,
-          '合格': 65,
-          '中': 75,
-          '良': 85,
-          '优': 95
-        };
-        // parse grades
-        let body_lst = parser.parseFromString(data[0], "text/html").querySelector('#dataList tbody').childNodes;
-        body_lst = Array.prototype.slice.call(body_lst, 0).filter((_, idx) => idx % 2 === 0).slice(1);
-        body_lst = body_lst.map(it => it.cells);
-
-        for (let item of body_lst) {
-          if (item[6].innerText.indexOf('免修') !== -1) continue;
-          if (item[6].innerText.indexOf('缓考') !== -1) continue;
-          semester_name = item[1].innerText.trim();
-          if (semesters.indexOf(semester_name) == -1) {
-            semesters.push(semester_name);
+        for (let i = 0; i < data.length; i++) {
+          let named_grade = {
+            '差': 65,
+            '及格': 65,
+            '合格': 65,
+            '中': 75,
+            '良': 85,
+            '优': 95
+          };
+          // parse grades
+          let body_lst = parser.parseFromString(data[i], "text/html").querySelector('#dataList tbody').childNodes;
+          body_lst = Array.prototype.slice.call(body_lst, 0).filter((_, idx) => idx % 2 === 0).slice(1);
+          body_lst = body_lst.map(it => it.cells);
+          try {
+            for (let item of body_lst) {
+              if (item[6].innerText.indexOf('免修') !== -1) continue;
+              if (item[6].innerText.indexOf('缓考') !== -1) continue;
+              semester_name = item[1].innerText.trim();
+              if (semesters.indexOf(semester_name) == -1) {
+                semesters.push(semester_name);
+              }
+              let grade_text = item[5].innerText.trim();
+              let grade = parseFloat(grade_text);
+              if (grade_text in named_grade)
+                grade = named_grade[grade_text];
+              if (isNaN(grade)) continue;
+              let course_no = item[2].innerText.trim();
+              let course_name_zh = item[3].innerText.trim();
+              let course_name_en = item[3].innerText.trim(); // not found yet...
+              let course_type = item[12].innerText.trim();
+              if (course_type === '公选') course_type = '任选';
+              let course_credit = item[7].innerText.trim();
+              course_lst.push(new course(
+                course_no,
+                course_name_zh,
+                semester_name,
+                course_type,
+                parseFloat(course_credit),
+                grade
+              ));
+              course_lst_csv += (course_name_en + ',' + course_credit + ',' + grade + '\n');
+            }
+          } catch (e) {
+            continue;
           }
-          let grade_text = item[5].innerText.trim();
-          let grade = parseFloat(grade_text);
-          if (grade_text in named_grade)
-            grade = named_grade[grade_text];
-          if (isNaN(grade)) continue;
-          let course_no = item[2].innerText.trim();
-          let course_name_zh = item[3].innerText.trim();
-          let course_name_en = item[3].innerText.trim(); // not found yet...
-          let course_type = item[12].innerText.trim();
-          if (course_type === '公选') course_type = '任选';
-          let course_credit = item[7].innerText.trim();
-          course_lst.push(new course(
-            course_no,
-            course_name_zh,
-            semester_name,
-            course_type,
-            parseFloat(course_credit),
-            grade
-          ));
-          course_lst_csv += (course_name_en + ',' + course_credit + ',' + grade + '\n');
         }
+
       }
 
 
